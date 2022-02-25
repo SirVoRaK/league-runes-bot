@@ -27,7 +27,7 @@ export function getChampionRunes(champ, lane) {
             const secondRuneAmount = runeBox.parentElement.querySelector(
                 '.rune_box > div:nth-child(4) .row:nth-child(4)'
             ).children.length
-            let yPos = 0
+            let yPos = 2
             let xPos = imgSize + defaultX
             let row = 1
             let curImg = 0
@@ -147,7 +147,7 @@ export function getChampionRunes(champ, lane) {
                 Canvas: Canvas,
                 Image: Image,
                 width: 32 * 4,
-                height: 32 * 12 + gap * 2,
+                height: 32 * 12 + gap * 2 + 4,
             })
             const buffer = new Buffer.from(b64.split(',')[1], 'base64')
             resolve(buffer)
