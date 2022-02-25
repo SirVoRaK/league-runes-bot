@@ -10,6 +10,7 @@ const { JSDOM } = jsdom
 
 export function getChampionRunes(champ, lane) {
     return new Promise(async (resolve, reject) => {
+        console.log(`> Generating runes for ${champ} ${lane}`)
         try {
             const imgSize = 32
             const res = await fetch(`https://br.op.gg/champions/${champ}/${lane}/runes`)
@@ -24,6 +25,7 @@ export function getChampionRunes(champ, lane) {
             const correctImgs = []
             const defaultX = imgSize / 2
             const runeAmount = runeBox.querySelector('.row:nth-child(2)').children.length
+            const lastRowRuneAmount = runeBox.querySelector('.row:nth-child(5)').children.length
             const secondRuneAmount = runeBox.parentElement.querySelector(
                 '.rune_box > div:nth-child(4) .row:nth-child(4)'
             ).children.length
@@ -69,14 +71,14 @@ export function getChampionRunes(champ, lane) {
                     curImg++
                     if (curImg === 4) {
                         curImg = 1
-                        xPos = defaultX
+                        xPos = lastRowRuneAmount === 4 ? 0 : defaultX
                         yPos += imgSize
                         row = 5
                     }
                 } else if (row === 5) {
-                    xPos = curImg * imgSize + defaultX
+                    xPos = curImg * imgSize + (lastRowRuneAmount === 4 ? 0 : defaultX)
                     curImg++
-                    if (curImg === 4) {
+                    if (curImg === (lastRowRuneAmount === 4 ? 5 : 4)) {
                         curImg = 1
                         xPos = imgSize + defaultX
                         yPos += imgSize + gap

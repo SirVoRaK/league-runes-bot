@@ -63,6 +63,25 @@ client.on('messageCreate', async (message) => {
             })
             await sleep(1000)
         } */
+    } else if (command === 't') {
+        const champ = 'shaco'
+        const lane = 'jungle'
+        const img = await getChampionRunes(champ, lane)
+        if (!img) {
+            message.reply('Invalid champion!')
+            return
+        }
+        message.channel.send(
+            `Link: **<https://br.op.gg/champions/${champ}/${lane}/runes>**\nChampion: **${champ}**\nLane: **${lane}**`
+        )
+        message.channel.send({
+            files: [
+                {
+                    attachment: img,
+                    name: `${champ}-${lane}.png`,
+                },
+            ],
+        })
     }
 })
 
