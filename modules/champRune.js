@@ -18,7 +18,7 @@ export function getChampionRunes(champ, lane) {
                 resolve(null)
                 return
             }
-            const dom = new JSDOM(data)
+            const dom = new JSDOM(data.replace(/<style>.+<\/style>/g, ''))
             const runeBox = dom.window.document.querySelector('.rune_box')
             const imgs = runeBox.querySelectorAll('img')
             const correctImgs = []
