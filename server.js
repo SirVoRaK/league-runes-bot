@@ -34,7 +34,7 @@ client.on('messageCreate', async (message) => {
             message.reply('Invalid lane!')
             return
         }
-        const champ = args[1]
+        const champ = args[1] + (args[2] ?? '')
         const img = await getChampionRunes(champ, lane)
         if (!img) {
             message.reply('Invalid champion!')
@@ -67,10 +67,6 @@ client.on('messageCreate', async (message) => {
         const champ = 'shaco'
         const lane = 'jungle'
         const img = await getChampionRunes(champ, lane)
-        if (!img) {
-            message.reply('Invalid champion!')
-            return
-        }
         message.channel.send(
             `Link: **<https://br.op.gg/champions/${champ}/${lane}/runes>**\nChampion: **${champ}**\nLane: **${lane}**`
         )
