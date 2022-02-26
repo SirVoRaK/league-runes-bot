@@ -14,22 +14,24 @@ client.on('ready', () => {
 
 const prefix = '!'
 
-const lanes = ['top', 'jungle', 'mid', 'adc', 'support']
-
-function validateLane(lane) {
-    if (lane === 'jg') return 'jungle'
-    if (lane === 'bot' || lane === 'bottom') return 'adc'
-    if (lane === 'sup') return 'support'
-    if (lanes.includes(lane)) return lane
-    return null
+const lanes = {
+    jg: 'jungle',
+    bot: 'adc',
+    bottom: 'adc',
+    sup: 'support',
+    top: 'top',
+    mid: 'mid',
+    jungle: 'jungle',
+    adc: 'adc',
+    support: 'support',
 }
 
-client.on('messageCreate', async (message) => {
-    if (!message.content.startsWith(prefix) || message.author.bot) return
+function validateLane(lane) {
+    return lanes[lane] ?? null
+}
 
-    const args = message.content.slice(prefix.length).trim().split(' ')
-    const command = args.shift().toLowerCase()
-    if (command === 'runes') {
+const cmd = {
+    runes(message, args) {
         const lane = validateLane(args[0])
         if (lane === null) {
             message.reply('Invalid lane!')
@@ -52,42 +54,25 @@ client.on('messageCreate', async (message) => {
                 },
             ],
         })
-        /* message.channel.send(`Champion: **${champ}**\nLane: **${lane}**`)
-        for (let i = 0; i < img.length; i++) {
-            message.channel.send({
-                files: [
-                    {
-                        attachment: img[i].src,
-                        name: `${champ}-${lane}-${i}.png`,
-                    },
-                ],
-            })
-            await sleep(1000)
-        } */
-    } else if (command === 't') {
-        const champ = 'shaco'
-        const lane = 'jungle'
-        const runes = await getChampionRunes(champ, lane)
-        message.channel.send(
-            `Link: **<https://br.op.gg/champions/${champ}/${lane}/runes>**\nChampion: **${champ}**\nLane: **${lane}**\nPick rate: **${runes.pickRate}%**\nWin rate: **${runes.winRate}%**\n`
-        )
-        message.channel.send({
-            files: [
-                {
-                    attachment: runes.img,
-                    name: `${champ}-${lane}.png`,
-                },
-            ],
-        })
-    } else if (command === 'champions') {
+    },
+    t(message) {
+        cmd.runes(message, ['jg', 'shaco'])
+    },
+    champions(message) {
         const champions = await getChampions()
         message.channel.send(`**Champions:** \n${champions}`)
+    },
+}
+
+client.on('messageCreate', async (message) => {
+    if (!message.content.startsWith(prefix) || message.author.bot) return
+
+    const args = message.content.slice(prefix.length).trim().split(' ')
+    const command = args.shift().toLowerCase()
+    const func = cmd[command]
+    if (func) {
+        func(message, args)
     }
 })
 
-function sleep(delay) {
-    return new Promise((resolve) => setTimeout(resolve, delay))
-}
-
 client.login(process.env.TOKEN)
-// getChampionRunes('jinx')
