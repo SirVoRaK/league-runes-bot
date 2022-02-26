@@ -31,7 +31,7 @@ function validateLane(lane) {
 }
 
 const cmd = {
-    runes(message, args) {
+    async runes(message, args) {
         const lane = validateLane(args[0])
         if (lane === null) {
             message.reply('Invalid lane!')
@@ -58,7 +58,7 @@ const cmd = {
     t(message) {
         cmd.runes(message, ['jg', 'shaco'])
     },
-    champions(message) {
+    async champions(message) {
         const champions = await getChampions()
         message.channel.send(`**Champions:** \n${champions}`)
     },
