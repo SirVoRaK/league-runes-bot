@@ -1,5 +1,6 @@
 import discordJs from 'discord.js'
 import { getChampionRunes } from './modules/champRune.js'
+import { getChampions } from './modules/champions.js'
 import dotenv from 'dotenv'
 dotenv.config()
 
@@ -34,19 +35,19 @@ client.on('messageCreate', async (message) => {
             message.reply('Invalid lane!')
             return
         }
-        const champ = (args[1] + (args[2] ?? '')).replace(/[\W\d]/g,'')
-        const img = await getChampionRunes(champ, lane)
-        if (!img) {
-            message.reply('Invalid champion!')
+        const champ = (args[1] + (args[2] ?? '')).replace(/[\W\d]/g, '')
+        const runes = await getChampionRunes(champ, lane)
+        if (!runes) {
+            message.reply('Invalid champion!\nUse `!champions` to get a list of champions.')
             return
         }
         message.channel.send(
-            `Link: **<https://br.op.gg/champions/${champ}/${lane}/runes>**\nChampion: **${champ}**\nLane: **${lane}**`
+            `Link: **<https://br.op.gg/champions/${champ}/${lane}/runes>**\nChampion: **${champ}**\nLane: **${lane}**\nPick rate: **${runes.pickRate}%**\nWin rate: **${runes.winRate}%**\n`
         )
         message.channel.send({
             files: [
                 {
-                    attachment: img,
+                    attachment: runes.img,
                     name: `${champ}-${lane}.png`,
                 },
             ],
@@ -66,18 +67,21 @@ client.on('messageCreate', async (message) => {
     } else if (command === 't') {
         const champ = 'shaco'
         const lane = 'jungle'
-        const img = await getChampionRunes(champ, lane)
+        const runes = await getChampionRunes(champ, lane)
         message.channel.send(
-            `Link: **<https://br.op.gg/champions/${champ}/${lane}/runes>**\nChampion: **${champ}**\nLane: **${lane}**`
+            `Link: **<https://br.op.gg/champions/${champ}/${lane}/runes>**\nChampion: **${champ}**\nLane: **${lane}**\nPick rate: **${runes.pickRate}%**\nWin rate: **${runes.winRate}%**\n`
         )
         message.channel.send({
             files: [
                 {
-                    attachment: img,
+                    attachment: runes.img,
                     name: `${champ}-${lane}.png`,
                 },
             ],
         })
+    } else if (command === 'champions') {
+        const champions = await getChampions()
+        message.channel.send(`**Champions:** \n${champions}`)
     }
 })
 

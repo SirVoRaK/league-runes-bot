@@ -152,7 +152,15 @@ export function getChampionRunes(champ, lane) {
                 height: 32 * 12 + gap * 2 + 4,
             })
             const buffer = new Buffer.from(b64.split(',')[1], 'base64')
-            resolve(buffer)
+            resolve({
+                img: buffer,
+                pickRate: runeBox.parentElement
+                    .querySelector('.pick_rate')
+                    .innerHTML.replace('<!-- -->%', ''),
+                winRate: runeBox.parentElement
+                    .querySelector('.win_rate')
+                    .innerHTML.replace('<!-- -->%', ''),
+            })
         } catch (e) {
             reject(e)
         }
