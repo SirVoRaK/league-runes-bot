@@ -34,7 +34,7 @@ client.on('messageCreate', async (message) => {
             message.reply('Invalid lane!')
             return
         }
-        const champ = args[1] + (args[2] ?? '')
+        const champ = (args[1] + (args[2] ?? '')).replace(/[\W\d]/g,'')
         const img = await getChampionRunes(champ, lane)
         if (!img) {
             message.reply('Invalid champion!')
