@@ -2,10 +2,15 @@ import discordJs from 'discord.js'
 import { getChampionRunes } from './modules/champRune.js'
 import { getChampions } from './modules/champions.js'
 import dotenv from 'dotenv'
+import { getChampionItems } from './modules/champItems.js'
+import { getChampionSkills } from './modules/champSkills.js'
 dotenv.config()
 
 const client = new discordJs.Client({
-    intents: [discordJs.Intents.FLAGS.GUILDS, discordJs.Intents.FLAGS.GUILD_MESSAGES],
+    intents: [
+        discordJs.Intents.FLAGS.GUILDS,
+        discordJs.Intents.FLAGS.GUILD_MESSAGES,
+    ],
 })
 
 client.on('ready', () => {
@@ -38,9 +43,18 @@ const cmd = {
             return
         }
         const champ = (args[1] + (args[2] ?? '')).replace(/[\W\d]/g, '')
-        const runes = await getChampionRunes(champ, lane)
+        const results = await Promise.all([
+            getChampionRunes(champ, lane),
+            getChampionItems(champ, lane),
+            getChampionSkills(champ, lane),
+        ])
+        const runes = results[0]
+        const items = results[1]
+        const skills = results[2]
         if (!runes) {
-            message.reply('Invalid champion!\nUse `!champions` to get a list of champions.')
+            message.reply(
+                'Invalid champion!\nUse `!champions` to get a list of champions.'
+            )
             return
         }
         message.channel.send(
@@ -51,6 +65,14 @@ const cmd = {
                 {
                     attachment: runes.img,
                     name: `${champ}-${lane}.png`,
+                },
+                {
+                    attachment: items.img,
+                    name: `${champ}-${lane}-items.png`,
+                },
+                {
+                    attachment: skills.img,
+                    name: `${champ}-${lane}-skills.png`,
                 },
             ],
         })
