@@ -51,7 +51,7 @@ const cmd = {
         const runes = results[0]
         const items = results[1]
         const skills = results[2]
-        if (!runes) {
+        if (!runes || !items || !skills) {
             message.reply(
                 'Invalid champion!\nUse `!champions` to get a list of champions.'
             )
@@ -76,6 +76,7 @@ const cmd = {
                 },
             ],
         })
+        console.log('> Sent')
     },
     t(message) {
         cmd.runes(message, ['jg', 'shaco'])
@@ -83,6 +84,9 @@ const cmd = {
     async champions(message) {
         const champions = await getChampions()
         message.channel.send(`**Champions:** \n${champions}`)
+    },
+    r(...args) {
+        cmd.runes(...args)
     },
 }
 
