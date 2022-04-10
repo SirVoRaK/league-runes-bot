@@ -8,16 +8,24 @@ export function getChampions() {
         try {
             const res = await fetch(`https://br.op.gg/champions`)
             const data = await res.text()
-            if (data.includes('<p>The page you have requested does not exist</p>')) {
+            if (
+                data.includes(
+                    '<p>The page you have requested does not exist</p>'
+                )
+            ) {
                 resolve(null)
                 return
             }
             const dom = new JSDOM(data.replace(/<style>.+<\/style>/g, ''))
             const championsA = [
-                ...dom.window.document.querySelectorAll('a[href*="/champions"].e1n0mtzi2'),
+                ...dom.window.document.querySelectorAll(
+                    'a[href*="/champions"].e1n0mtzi2'
+                ),
             ]
             const championsName = championsA.map((a) => {
-                return a.href.split('/')[2]
+                const name = a.href.split('/')[2]
+                if (name === 'monkeyking') return 'wukong'
+                return name
             })
             resolve(championsName.join('\n'))
         } catch (e) {
