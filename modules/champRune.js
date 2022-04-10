@@ -13,19 +13,24 @@ export function getChampionRunes(champ, lane) {
         console.log(`> Generating runes for ${champ} ${lane}`)
         try {
             const imgSize = 32
-            const res = await fetch(`https://br.op.gg/champions/${champ}/${lane}/runes`)
+            const res = await fetch(
+                `https://br.op.gg/champions/${champ}/${lane}/runes`
+            )
             const data = await res.text()
-            if (data.includes('<p>The page you have requested does not exist</p>')) {
-                resolve(null)
-                return
-            }
+
             const dom = new JSDOM(data.replace(/<style>.+<\/style>/g, ''))
+
+            if (dom.window.document.querySelector('.champion_img') === null)
+                return resolve(null)
+
             const runeBox = dom.window.document.querySelector('.rune_box')
             const imgs = runeBox.querySelectorAll('img')
             const correctImgs = []
             const defaultX = imgSize / 2
-            const runeAmount = runeBox.querySelector('.row:nth-child(2)').children.length
-            const lastRowRuneAmount = runeBox.querySelector('.row:nth-child(5)').children.length
+            const runeAmount =
+                runeBox.querySelector('.row:nth-child(2)').children.length
+            const lastRowRuneAmount =
+                runeBox.querySelector('.row:nth-child(5)').children.length
             const secondRuneAmount = runeBox.parentElement.querySelector(
                 '.rune_box > div:nth-child(4) .row:nth-child(4)'
             ).children.length
@@ -76,7 +81,9 @@ export function getChampionRunes(champ, lane) {
                         row = 5
                     }
                 } else if (row === 5) {
-                    xPos = curImg * imgSize + (lastRowRuneAmount === 4 ? 0 : defaultX)
+                    xPos =
+                        curImg * imgSize +
+                        (lastRowRuneAmount === 4 ? 0 : defaultX)
                     curImg++
                     if (curImg === (lastRowRuneAmount === 4 ? 5 : 4)) {
                         curImg = 1
@@ -108,7 +115,9 @@ export function getChampionRunes(champ, lane) {
                         row = 9
                     }
                 } else if (row === 9) {
-                    xPos = curImg * imgSize + (secondRuneAmount === 3 ? defaultX : 0)
+                    xPos =
+                        curImg * imgSize +
+                        (secondRuneAmount === 3 ? defaultX : 0)
                     curImg++
                     if (curImg === (secondRuneAmount === 3 ? 4 : 5)) {
                         curImg = 1
@@ -145,11 +154,12 @@ export function getChampionRunes(champ, lane) {
                     }
                 }
             })
+            const height = 32 * 12 + gap * 2 + 4
             const b64 = await mergeImgs(correctImgs, {
                 Canvas: Canvas,
                 Image: Image,
                 width: 32 * 4,
-                height: 32 * 12 + gap * 2 + 4,
+                height,
             })
             const buffer = new Buffer.from(b64.split(',')[1], 'base64')
             resolve({
@@ -160,6 +170,8 @@ export function getChampionRunes(champ, lane) {
                 winRate: runeBox.parentElement
                     .querySelector('.win_rate')
                     .innerHTML.replace('<!-- -->%', ''),
+                imgHeight: height,
+                imgWidth: 32 * 4,
             })
         } catch (e) {
             reject(e)

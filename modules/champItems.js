@@ -17,15 +17,12 @@ export function getChampionItems(champ, lane) {
                 `https://br.op.gg/champions/${champ}/${lane}/items`
             )
             const data = await res.text()
-            if (
-                data.includes(
-                    '<p>The page you have requested does not exist</p>'
-                )
-            ) {
-                resolve(null)
-                return
-            }
+
             const dom = new JSDOM(data.replace(/<style>.+<\/style>/g, ''))
+
+            if (dom.window.document.querySelector('.champion_img') === null)
+                return resolve(null)
+
             const images = [
                 ...dom.window.document
                     .querySelectorAll('tr[type="coreBuild"]')[0]
@@ -52,6 +49,7 @@ export function getChampionItems(champ, lane) {
             const buffer = new Buffer.from(b64.split(',')[1], 'base64')
             resolve({
                 img: buffer,
+                imgHeight: imgSize,
             })
         } catch (e) {
             reject(e)

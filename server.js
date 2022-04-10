@@ -4,6 +4,14 @@ import { getChampions } from './modules/champions.js'
 import dotenv from 'dotenv'
 import { getChampionItems } from './modules/champItems.js'
 import { getChampionSkills } from './modules/champSkills.js'
+import { getChampionCounters } from './modules/champCounters.js'
+import * as canvas from 'canvas'
+import * as mergeImages from 'merge-images'
+import { generateText } from './modules/generateText.js'
+
+const { Canvas, Image } = canvas.default
+const { default: mergeImgs } = mergeImages
+
 dotenv.config()
 
 const client = new discordJs.Client({
@@ -44,35 +52,70 @@ const cmd = {
         }
         const champ = (args[1] + (args[2] ?? '')).replace(/[\W\d]/g, '')
         const results = await Promise.all([
+            generateText('Runes'),
             getChampionRunes(champ, lane),
+            generateText('Items'),
             getChampionItems(champ, lane),
+            generateText('Skills'),
             getChampionSkills(champ, lane),
+            generateText('Counters'),
+            getChampionCounters(champ, lane),
         ])
-        const runes = results[0]
-        const items = results[1]
-        const skills = results[2]
-        if (!runes || !items || !skills) {
+        const runes = results[1]
+        const items = results[3]
+        const skills = results[5]
+        const counters = results[7]
+        if (!runes || !items || !skills || !counters) {
             message.reply(
                 'Invalid champion!\nUse `!champions` to get a list of champions.'
             )
             return
         }
+        let nextX = 0
+        let nextY = 0
+        const columnGap = 10
+        const allImgsOpt = results.map((r, i) => {
+            const obj = {
+                src: r.img ?? r.weakAgainst,
+                x: nextX,
+                y: nextY,
+            }
+            nextY += r.imgHeight
+
+            if (i > 0) nextX = runes.imgWidth + columnGap
+
+            if (i === 1) nextY = 0
+
+            return obj
+        })
+        const strongText = await generateText(`Strong vs`)
+        allImgsOpt.push({
+            src: strongText.img,
+            x: nextX,
+            y: nextY,
+        })
+        nextY += strongText.imgHeight
+        allImgsOpt.push({
+            src: counters.strongAgainst,
+            x: nextX,
+            y: nextY,
+        })
+        const b64All = await mergeImgs(allImgsOpt, {
+            Canvas: Canvas,
+            Image: Image,
+            width: 32 * 5 + columnGap + 32 * 4,
+            height: runes.imgHeight + results[0].imgHeight,
+        })
+        const bufferAll = new Buffer.from(b64All.split(',')[1], 'base64')
+
         message.channel.send(
-            `Link: **<https://br.op.gg/champions/${champ}/${lane}/runes>**\nChampion: **${champ}**\nLane: **${lane}**\nPick rate: **${runes.pickRate}%**\nWin rate: **${runes.winRate}%**\n`
+            `Link: **<https://br.op.gg/champions/${champ}/${lane}/runes>**\nChampion: **${champ}**\nLane: **${lane}**\n`
         )
-        message.channel.send({
+        await message.channel.send({
             files: [
                 {
-                    attachment: runes.img,
-                    name: `${champ}-${lane}.png`,
-                },
-                {
-                    attachment: items.img,
-                    name: `${champ}-${lane}-items.png`,
-                },
-                {
-                    attachment: skills.img,
-                    name: `${champ}-${lane}-skills.png`,
+                    attachment: bufferAll,
+                    name: `${champ}_${lane}.png`,
                 },
             ],
         })

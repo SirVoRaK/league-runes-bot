@@ -17,15 +17,11 @@ export function getChampionSkills(champ, lane) {
                 `https://br.op.gg/champions/${champ}/${lane}/skills`
             )
             const data = await res.text()
-            if (
-                data.includes(
-                    '<p>The page you have requested does not exist</p>'
-                )
-            ) {
-                resolve(null)
-                return
-            }
             const dom = new JSDOM(data.replace(/<style>.+<\/style>/g, ''))
+
+            if (dom.window.document.querySelector('.champion_img') === null)
+                return resolve(null)
+
             const images = [
                 ...dom.window.document
                     .querySelector('.content ul ul')
@@ -53,6 +49,7 @@ export function getChampionSkills(champ, lane) {
             const buffer = new Buffer.from(b64.split(',')[1], 'base64')
             resolve({
                 img: buffer,
+                imgHeight: imgSize,
             })
         } catch (e) {
             reject(e)
