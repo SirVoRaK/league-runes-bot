@@ -50,7 +50,8 @@ const cmd = {
             message.reply('Invalid lane!')
             return
         }
-        const champ = (args[1] + (args[2] ?? '')).replace(/[\W\d]/g, '')
+        let champ = (args[1] + (args[2] ?? '')).replace(/[\W\d]/g, '')
+        if (champ === 'wukong') champ = 'monkeyking'
         const results = await Promise.all([
             generateText('Runes'),
             getChampionRunes(champ, lane),
