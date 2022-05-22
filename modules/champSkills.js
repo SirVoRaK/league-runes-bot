@@ -14,7 +14,12 @@ export function getChampionSkills(champ, lane) {
         try {
             const imgSize = 32
             const res = await fetch(
-                `https://br.op.gg/champions/${champ}/${lane}/skills`
+                `https://br.op.gg/champions/${champ}/${lane}/skills`,
+                {
+                    headers: {
+                        cookie: '_old=true',
+                    },
+                }
             )
             const data = await res.text()
             const dom = new JSDOM(data.replace(/<style>.+<\/style>/g, ''))

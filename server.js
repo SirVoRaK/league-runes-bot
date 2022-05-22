@@ -46,10 +46,8 @@ function validateLane(lane) {
 const cmd = {
     async runes(message, args) {
         const lane = validateLane(args[0])
-        if (lane === null) {
-            message.reply('Invalid lane!')
-            return
-        }
+        if (lane === null) return message.reply('Invalid lane!')
+
         let champ = (args[1] + (args[2] ?? '')).replace(/[\W\d]/g, '')
         if (champ === 'wukong') champ = 'monkeyking'
         const results = await Promise.all([

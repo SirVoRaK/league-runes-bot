@@ -15,7 +15,12 @@ export function getChampionCounters(champ, lane) {
             const champAmount = 5
             const imgSize = 32
             const res = await fetch(
-                `https://br.op.gg/champions/${champ}/${lane}/counters`
+                `https://br.op.gg/champions/${champ}/${lane}/counters`,
+                {
+                    headers: {
+                        cookie: '_old=true',
+                    },
+                }
             )
             const data = await res.text()
 

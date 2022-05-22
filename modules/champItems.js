@@ -14,7 +14,12 @@ export function getChampionItems(champ, lane) {
         try {
             const imgSize = 32
             const res = await fetch(
-                `https://br.op.gg/champions/${champ}/${lane}/items`
+                `https://br.op.gg/champions/${champ}/${lane}/items`,
+                {
+                    headers: {
+                        cookie: '_old=true',
+                    },
+                }
             )
             const data = await res.text()
 

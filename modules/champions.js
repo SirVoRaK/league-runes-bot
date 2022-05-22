@@ -6,7 +6,11 @@ export function getChampions() {
     return new Promise(async (resolve, reject) => {
         console.log(`> Generating champions`)
         try {
-            const res = await fetch(`https://br.op.gg/champions`)
+            const res = await fetch(`https://br.op.gg/champions`, {
+                headers: {
+                    cookie: '_old=true',
+                },
+            })
             const data = await res.text()
             if (
                 data.includes(
