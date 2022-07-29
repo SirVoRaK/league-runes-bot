@@ -1,7 +1,7 @@
-import jsdom from 'jsdom'
-import fetch from 'node-fetch'
-import * as canvas from 'canvas'
-import * as mergeImages from 'merge-images'
+import jsdom from "jsdom"
+import fetch from "node-fetch"
+import * as canvas from "canvas"
+import * as mergeImages from "merge-images"
 
 const { Canvas, Image } = canvas.default
 const { default: mergeImgs } = mergeImages
@@ -14,33 +14,24 @@ export function getChampionItems(champ, lane) {
         try {
             const imgSize = 32
             const res = await fetch(
-                `https://br.op.gg/champions/${champ}/${lane}/items`,
-                {
-                    headers: {
-                        cookie: '_old=true',
-                    },
-                }
+                `https://br.op.gg/champions/${champ}/${lane}/items`
             )
             const data = await res.text()
 
-            const dom = new JSDOM(data.replace(/<style>.+<\/style>/g, ''))
+            const dom = new JSDOM(data.replace(/<style>.+<\/style>/g, ""))
 
-            if (dom.window.document.querySelector('.champion_img') === null)
+            if (dom.window.document.querySelector(".champion-img") === null)
                 return resolve(null)
 
             const images = [
                 ...dom.window.document
-                    .querySelectorAll('tr[type="coreBuild"]')[0]
-                    .querySelectorAll('img'),
+                    .querySelector("div.css-37vh9h:nth-child(2)")
+                    .querySelectorAll("img"),
             ]
             const gap = 0
             const imgOpt = images.map((img, i) => {
                 return {
-                    src: img.src
-                        .replace('w_128', 'w_32')
-                        .replace('w_auto', 'w_32')
-                        .replace('w_96', 'w_32')
-                        .replace('w_168', 'w_32'),
+                    src: img.src.replace(/w_[^,]+/, "w_32"),
                     x: imgSize * i + gap * i,
                     y: 0,
                 }
@@ -51,7 +42,7 @@ export function getChampionItems(champ, lane) {
                 width: imgSize * 3 + gap * 2,
                 height: imgSize,
             })
-            const buffer = new Buffer.from(b64.split(',')[1], 'base64')
+            const buffer = new Buffer.from(b64.split(",")[1], "base64")
             resolve({
                 img: buffer,
                 imgHeight: imgSize,

@@ -1,13 +1,13 @@
-import discordJs from 'discord.js'
-import { getChampionRunes } from './modules/champRune.js'
-import { getChampions } from './modules/champions.js'
-import dotenv from 'dotenv'
-import { getChampionItems } from './modules/champItems.js'
-import { getChampionSkills } from './modules/champSkills.js'
-import { getChampionCounters } from './modules/champCounters.js'
-import * as canvas from 'canvas'
-import * as mergeImages from 'merge-images'
-import { generateText } from './modules/generateText.js'
+import discordJs from "discord.js"
+import { getChampionRunes } from "./modules/champRune.js"
+import { getChampions } from "./modules/champions.js"
+import dotenv from "dotenv"
+import { getChampionItems } from "./modules/champItems.js"
+import { getChampionSkills } from "./modules/champSkills.js"
+import { getChampionCounters } from "./modules/champCounters.js"
+import * as canvas from "canvas"
+import * as mergeImages from "merge-images"
+import { generateText } from "./modules/generateText.js"
 
 const { Canvas, Image } = canvas.default
 const { default: mergeImgs } = mergeImages
@@ -21,22 +21,22 @@ const client = new discordJs.Client({
     ],
 })
 
-client.on('ready', () => {
+client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}!`)
 })
 
-const prefix = '!'
+const prefix = "!"
 
 const lanes = {
-    jg: 'jungle',
-    bot: 'adc',
-    bottom: 'adc',
-    sup: 'support',
-    top: 'top',
-    mid: 'mid',
-    jungle: 'jungle',
-    adc: 'adc',
-    support: 'support',
+    jg: "jungle",
+    bot: "adc",
+    bottom: "adc",
+    sup: "support",
+    top: "top",
+    mid: "mid",
+    jungle: "jungle",
+    adc: "adc",
+    support: "support",
 }
 
 function validateLane(lane) {
@@ -44,20 +44,38 @@ function validateLane(lane) {
 }
 
 const cmd = {
+    async raw(message, args) {
+        const lane = validateLane(args[0])
+        if (lane === null) return message.reply("Invalid lane!")
+
+        let champ = (args[1] + (args[2] ?? "")).replace(/[\W\d]/g, "")
+        if (champ === "wukong") champ = "monkeyking"
+
+        const result = await getChampionCounters(champ, lane)
+        await message.channel.send({
+            files: [
+                {
+                    attachment: result.weakAgainst,
+                    name: `${champ}_${lane}.png`,
+                },
+            ],
+        })
+        console.log("> Sent")
+    },
     async runes(message, args) {
         const lane = validateLane(args[0])
-        if (lane === null) return message.reply('Invalid lane!')
+        if (lane === null) return message.reply("Invalid lane!")
 
-        let champ = (args[1] + (args[2] ?? '')).replace(/[\W\d]/g, '')
-        if (champ === 'wukong') champ = 'monkeyking'
+        let champ = (args[1] + (args[2] ?? "")).replace(/[\W\d]/g, "")
+        if (champ === "wukong") champ = "monkeyking"
         const results = await Promise.all([
-            generateText('Runes'),
+            generateText("Runes"),
             getChampionRunes(champ, lane),
-            generateText('Items'),
+            generateText("Items"),
             getChampionItems(champ, lane),
-            generateText('Skills'),
+            generateText("Skills"),
             getChampionSkills(champ, lane),
-            generateText('Counters'),
+            generateText("Counters"),
             getChampionCounters(champ, lane),
         ])
         const runes = results[1]
@@ -66,7 +84,7 @@ const cmd = {
         const counters = results[7]
         if (!runes || !items || !skills || !counters) {
             message.reply(
-                'Invalid champion!\nUse `!champions` to get a list of champions.'
+                "Invalid champion!\nUse `!champions` to get a list of champions."
             )
             return
         }
@@ -105,7 +123,7 @@ const cmd = {
             width: 32 * 5 + columnGap + 32 * 4,
             height: runes.imgHeight + results[0].imgHeight,
         })
-        const bufferAll = new Buffer.from(b64All.split(',')[1], 'base64')
+        const bufferAll = new Buffer.from(b64All.split(",")[1], "base64")
 
         message.channel.send(
             `Link: **<https://br.op.gg/champions/${champ}/${lane}/runes>**\nChampion: **${champ}**\nLane: **${lane}**\n`
@@ -118,10 +136,10 @@ const cmd = {
                 },
             ],
         })
-        console.log('> Sent')
+        console.log("> Sent")
     },
     t(message) {
-        cmd.runes(message, ['jg', 'shaco'])
+        cmd.runes(message, ["jg", "shaco"])
     },
     async champions(message) {
         const champions = await getChampions()
@@ -132,10 +150,10 @@ const cmd = {
     },
 }
 
-client.on('messageCreate', async (message) => {
+client.on("messageCreate", async (message) => {
     if (!message.content.startsWith(prefix) || message.author.bot) return
 
-    const args = message.content.slice(prefix.length).trim().split(' ')
+    const args = message.content.slice(prefix.length).trim().split(" ")
     const command = args.shift().toLowerCase()
     const func = cmd[command]
     if (func) {

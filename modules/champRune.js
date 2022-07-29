@@ -1,7 +1,7 @@
-import jsdom from 'jsdom'
-import fetch from 'node-fetch'
-import * as canvas from 'canvas'
-import * as mergeImages from 'merge-images'
+import jsdom from "jsdom"
+import fetch from "node-fetch"
+import * as canvas from "canvas"
+import * as mergeImages from "merge-images"
 
 const { Canvas, Image } = canvas.default
 const { default: mergeImgs } = mergeImages
@@ -14,30 +14,26 @@ export function getChampionRunes(champ, lane) {
         try {
             const imgSize = 32
             const res = await fetch(
-                `https://br.op.gg/champions/${champ}/${lane}/runes`,
-                {
-                    headers: {
-                        cookie: '_old=true',
-                    },
-                }
+                `https://br.op.gg/champions/${champ}/${lane}/runes`
             )
             const data = await res.text()
 
-            const dom = new JSDOM(data.replace(/<style>.+<\/style>/g, ''))
+            const dom = new JSDOM(data.replace(/<style>.+<\/style>/g, ""))
 
-            if (dom.window.document.querySelector('.champion_img') === null)
+            if (dom.window.document.querySelector(".champion-img") === null)
                 return resolve(null)
 
-            const runeBox = dom.window.document.querySelector('.rune_box')
-            const imgs = runeBox.querySelectorAll('img')
+            const runeBoxSelector = "div.css-173kbtp:nth-child(2)"
+            const runeBox = dom.window.document.querySelector(runeBoxSelector)
+            const imgs = runeBox.querySelectorAll("img")
             const correctImgs = []
             const defaultX = imgSize / 2
             const runeAmount =
-                runeBox.querySelector('.row:nth-child(2)').children.length
+                runeBox.querySelector(".row:nth-child(4)").children.length
             const lastRowRuneAmount =
-                runeBox.querySelector('.row:nth-child(5)').children.length
+                runeBox.querySelector(".row:nth-child(7)").children.length
             const secondRuneAmount = runeBox.parentElement.querySelector(
-                '.rune_box > div:nth-child(4) .row:nth-child(4)'
+                `${runeBoxSelector} > div:nth-child(4) > .row:nth-child(5)`
             ).children.length
             let yPos = 2
             let xPos = imgSize + defaultX
@@ -46,10 +42,7 @@ export function getChampionRunes(champ, lane) {
             const gap = 15
             imgs.forEach((i) => {
                 correctImgs.push({
-                    src: i.src
-                        .replace('w_128', 'w_32')
-                        .replace('w_auto', 'w_32')
-                        .replace('w_96', 'w_32'),
+                    src: i.src.replace(/w_[^,]+/, "w_32"),
                     x: xPos,
                     y: yPos,
                 })
@@ -166,15 +159,15 @@ export function getChampionRunes(champ, lane) {
                 width: 32 * 4,
                 height,
             })
-            const buffer = new Buffer.from(b64.split(',')[1], 'base64')
+            const buffer = new Buffer.from(b64.split(",")[1], "base64")
             resolve({
                 img: buffer,
-                pickRate: runeBox.parentElement
-                    .querySelector('.pick_rate')
-                    .innerHTML.replace('<!-- -->%', ''),
-                winRate: runeBox.parentElement
-                    .querySelector('.win_rate')
-                    .innerHTML.replace('<!-- -->%', ''),
+                pickRate: runeBox.parentElement.parentElement
+                    .querySelector("span.css-d86t1k:nth-child(2)")
+                    .innerHTML.replace("<!-- -->%", ""),
+                winRate: runeBox.parentElement.parentElement
+                    .querySelector("td.css-1wvfkid:nth-child(6)")
+                    .innerHTML.replace("<!-- -->%", ""),
                 imgHeight: height,
                 imgWidth: 32 * 4,
             })

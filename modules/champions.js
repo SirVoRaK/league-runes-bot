@@ -8,7 +8,7 @@ export function getChampions() {
         try {
             const res = await fetch(`https://br.op.gg/champions`, {
                 headers: {
-                    cookie: '_old=true',
+                    cookie: '_old=false; _oul=true',
                 },
             })
             const data = await res.text()
